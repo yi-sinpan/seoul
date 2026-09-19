@@ -1545,6 +1545,7 @@ footer{width:var(--wrap);margin-inline:auto;padding-block:1.8rem 3rem;border-top
 
 <footer>
   <div>首爾八日作戰手冊 · 2026/09/19 – 09/26 · ARA Hotel 서울 종로구 난계로29길<i class="zh">蘭溪路29街</i> 60</div>
+  <div><b>綠色的 N</b> 在手機上會直接開 Naver Map App 並帶入搜尋；沒裝 App 就退回網頁版。萬一 App 還是停在首頁，就用地址旁的「複製」鈕把韓文地址複製起來，貼進 App 的搜尋框。</div>
   <div>地址、營業時間、退稅門檻與信用卡活動期限均為查證當下的資訊，出發前請再確認一次。地鐵出口的電梯位置請用 KakaoMap「교통약자정보<i class="zh">交通弱勢者資訊</i>」現場確認。</div>
 </footer>
 
@@ -1979,6 +1980,38 @@ footer{width:var(--wrap);margin-inline:auto;padding-block:1.8rem 3rem;border-top
       '<div class="elist">' + rows + '</div>';
     renderCats();
   }
+
+  /* ---------- Naver 地圖：手機直接丟進 App 的搜尋 ---------- */
+  // 原本點 https://map.naver.com/p/search/… 會先開網頁、再被交棒給 App，
+  // 但交棒的時候搜尋字會掉，所以 App 只會停在首頁。
+  // 改成手機上直接送 nmap://search?query=…，查詢字就不會不見。
+  (function(){
+    var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent || "");
+    if (!isMobile) return;
+    var APPNAME = encodeURIComponent(location.origin || "seoul-handbook");
+    document.addEventListener("click", function(ev){
+      var a = ev.target.closest && ev.target.closest("a.nv");
+      if (!a) return;
+      var href = a.getAttribute("href") || "";
+      var m = href.match(/\/p\/search\/([^?#]+)/);
+      if (!m) return;                       // 不是搜尋型連結就照舊
+      ev.preventDefault();
+      var deep = "nmap://search?query=" + m[1] + "&appname=" + APPNAME;
+      var t0 = Date.now(), done = false;
+      function cancel(){ done = true; }
+      window.addEventListener("pagehide", cancel, { once: true });
+      document.addEventListener("visibilitychange", function(){
+        if (document.hidden) cancel();
+      }, { once: true });
+      // App 沒接手就退回網頁版
+      setTimeout(function(){
+        if (done || document.hidden || Date.now() - t0 >= 2600) return;
+        var w = window.open(href, "_blank", "noopener");   // 先試新分頁，手冊才不會被蓋掉
+        if (!w) window.location.href = href;               // 被擋就只好換頁（按上一頁可以回來）
+      }, 1300);
+      window.location.href = deep;
+    }, true);
+  })();
 
   /* ---------- 分類明細 ＋ 圓餅圖 ---------- */
   // 顏色跟著「分類」走，不跟著金額排名走——同一個分類在任何時候都是同一色
