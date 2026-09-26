@@ -553,6 +553,30 @@ form.add.editing::before{content:"修改中——改完按「儲存修改」，�
 button.cancel{font-family:var(--f-data);font-weight:700;font-size:.8rem;padding:.55rem .9rem;flex:0 0 auto;
   border:1px solid var(--border-strong);border-radius:3px;background:var(--surface);color:var(--muted);cursor:pointer;white-space:nowrap}
 button.cancel:hover{color:var(--alert);border-color:var(--alert)}
+.krwbig{font-family:var(--f-data);font-weight:700;font-size:1rem;color:var(--muted);
+  font-variant-numeric:tabular-nums;margin-top:-.15rem}
+form.add .f-cat{grid-column:span 12}
+@media (min-width:761px){form.add{grid-template-columns:1.3fr 1.8fr 1fr auto}
+  form.add .f-cat{grid-column:auto}}
+.meters{grid-template-columns:1fr}
+.rate-row{flex-direction:column;align-items:stretch;gap:.5rem}
+.rbar{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
+.rbar .lbl{flex:0 0 auto}
+.runit{font-size:.81rem;color:var(--muted)}
+.rstepper{display:flex;align-items:stretch;border:1px solid var(--border-strong);border-radius:3px;overflow:hidden;background:var(--surface)}
+.rstepper input{width:4.6rem;border:none;border-radius:0;text-align:center;font-size:1.02rem;font-weight:800;
+  font-family:var(--f-data);font-variant-numeric:tabular-nums;padding-inline:.2rem}
+.rstepper input::-webkit-outer-spin-button,.rstepper input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.rstepper input[type=number]{-moz-appearance:textfield}
+button.rstep{border:none;background:var(--surface-2);color:var(--ink);font-family:var(--f-data);font-weight:800;
+  font-size:1.05rem;padding:0 .85rem;cursor:pointer;min-height:2.4rem}
+button.rstep:hover{background:var(--accent);color:#fff}
+.rpick{display:flex;gap:.35rem;flex-wrap:wrap}
+.rpick button{flex:1 1 auto;min-width:2.9rem;font-family:var(--f-data);font-weight:700;font-size:.85rem;
+  padding:.4rem .2rem;border:1px solid var(--border-strong);border-radius:3px;background:var(--surface);
+  color:var(--ink-2);cursor:pointer}
+.rpick button:hover{border-color:var(--accent);color:var(--accent)}
+.rpick button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
 /* ---------- expense tool ---------- */
 .tool{background:var(--surface);border:1px solid var(--border-strong);border-radius:4px;box-shadow:var(--shadow);overflow:hidden}
 .tool-head{padding:.85rem 1.1rem;border-bottom:1px solid var(--border);background:var(--surface-2);display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
@@ -589,8 +613,7 @@ footer{width:var(--wrap);margin-inline:auto;padding-block:1.8rem 3rem;border-top
   form.add .f-name{grid-column:span 5}
   form.add .f-amt{grid-column:span 7}
   form.add .f-cat{grid-column:span 6}
-  form.add .f-method{grid-column:span 6}
-  form.add .f-card,form.add .f-go{grid-column:1 / -1}
+  form.add .f-go{grid-column:1 / -1}
   .seg button{padding:.5rem .5rem}
   .amtbox{gap:.3rem}
   .amtbox input{min-width:3.5rem}
@@ -1476,23 +1499,21 @@ footer{width:var(--wrap);margin-inline:auto;padding-block:1.8rem 3rem;border-top
 <section class="panel-sec" id="p-log" role="tabpanel" aria-labelledby="t-log" hidden>
   <div class="sec-head">
     <h2><svg><use href="#i-book"/></svg>消費紀錄</h2>
-    <p class="note">旅途中用的。每筆消費隨手記，<b>韓元台幣都能輸入</b>，自動換算，盯住三條線。記錄存在雲端，換裝置、關掉再開都還在。</p>
+    <p class="note">每筆消費隨手記，<b>韓元台幣都能輸入</b>，自動換算成兩種幣別。<b>只分類型，不分哪張卡。</b>記錄存在雲端，換裝置、關掉再開都還在——<b>但只有 Claude 手冊那一份會同步</b>，離線版（GitHub／下載的檔案）是各記各的。</p>
   </div>
+
+  <div class="call alert" id="offline-warn" hidden><svg><use href="#i-warn"/></svg><div class="body">
+    <h4>這是離線快照</h4>
+    <p>你現在開的是<b>離線版</b>（GitHub 上那份、或下載到手機的檔案）。下面 63 筆是
+    <b>2026/9/26 匯出的完整紀錄</b>，看和算都沒問題。<br>
+    但它<b>不會跟雲端同步</b>：在這裡新增、修改、刪除只會存在這支手機的瀏覽器裡，
+    Claude 手冊那一份不會跟著變，反過來也一樣。<b>要長期記帳請用 Claude 手冊那一份。</b></p></div></div>
 
   <div class="meters" id="meters">
     <div class="meter">
-      <div class="top"><span class="cap"><svg><use href="#i-coin"/></svg>已花費</span><span class="val" id="m-spent">NT$0</span></div>
+      <div class="top"><span class="cap"><svg><use href="#i-coin"/></svg>總花費</span><span class="val" id="m-spent">NT$0</span></div>
+      <div class="krwbig" id="m-spent-krw">₩0</div>
       <div class="foot" id="m-spent-foot">還沒有紀錄</div>
-    </div>
-    <div class="meter">
-      <div class="top"><span class="cap"><svg><use href="#i-card"/></svg>富邦 J 卡上限</span><span class="val" id="m-jcard">NT$0</span></div>
-      <div class="bar"><i id="m-jcard-bar"></i></div>
-      <div class="foot">刷滿 NT$33,333 後 6% 加碼失效，改刷中信<br><b>只計在韓國刷的</b>（用台幣輸入的不算海外消費）</div>
-    </div>
-    <div class="meter">
-      <div class="top"><span class="cap"><svg><use href="#i-receipt"/></svg>退稅免驗門檻</span><span class="val" id="m-refund">₩0</span></div>
-      <div class="bar"><i id="m-refund-bar"></i></div>
-      <div class="foot">預估退稅額，超過 ₩75,000 就要海關查驗<br><b>只計在韓國買的</b></div>
     </div>
   </div>
 
@@ -1515,19 +1536,27 @@ footer{width:var(--wrap);margin-inline:auto;padding-block:1.8rem 3rem;border-top
         <span class="nthint" id="f-nt">≈ NT$0</span></div>
       <div class="field f-cat"><label for="f-cat">分類</label>
         <select id="f-cat"><option>購物</option><option>醫美</option><option>餐食</option><option>交通</option><option>住宿</option><option>門票雜項</option></select></div>
-      <div class="field f-method"><label>付款</label>
-        <div class="seg segw" id="f-method" role="group" aria-label="付款方式">
-          <button type="button" data-v="刷卡" aria-pressed="true">刷卡</button>
-          <button type="button" data-v="付現" aria-pressed="false">付現</button>
-        </div></div>
-      <div class="field f-card"><label for="f-card">用哪張</label>
-        <select id="f-card"><option>富邦 J 卡</option><option>富邦 Costco</option><option>中信 LINE Pay</option><option>國泰 CUBE</option></select></div>
       <div class="field f-go"><button class="go" type="submit"><svg><use href="#i-plus"/></svg><span id="go-txt">記一筆</span></button><button class="cancel" type="button" id="f-cancel" hidden>取消</button></div>
     </form>
-    <div class="rate-row" hidden>
-      <label for="f-rate" class="lbl" style="text-transform:none">匯率　1 TWD =</label>
-      <input id="f-rate" type="number" min="1" step="0.1" value="43">
-      <span>韓元　·　<b>用台幣輸入的那筆，台幣金額就固定不動</b>（在台灣刷的、跟團費那種）；用韓元輸入的會跟著匯率浮動　·　退稅預估只計「購物」分類、單筆 ≥ ₩15,000 者，以 7.5% 估算</span>
+    <div class="rate-row">
+      <div class="rbar">
+        <label for="f-rate" class="lbl" style="text-transform:none">匯率　1 TWD =</label>
+        <div class="rstepper">
+          <button type="button" class="rstep" data-d="-0.1" aria-label="匯率減 0.1">−</button>
+          <input id="f-rate" type="number" min="1" step="0.1" value="43" inputmode="decimal">
+          <button type="button" class="rstep" data-d="0.1" aria-label="匯率加 0.1">＋</button>
+        </div>
+        <span class="runit">韓元</span>
+      </div>
+      <div class="rpick" id="rpick" role="group" aria-label="常用匯率">
+        <button type="button" data-r="40">40</button>
+        <button type="button" data-r="41">41</button>
+        <button type="button" data-r="42">42</button>
+        <button type="button" data-r="43">43</button>
+        <button type="button" data-r="44">44</button>
+        <button type="button" data-r="45">45</button>
+      </div>
+      <span><b>用台幣輸入的那筆，台幣金額就固定不動</b>（機票、住宿、醫美那種）；用韓元輸入的會跟著匯率浮動
     </div>
     <div class="log" id="log"></div>
   </div>
@@ -1900,8 +1929,7 @@ footer{width:var(--wrap);margin-inline:auto;padding-block:1.8rem 3rem;border-top
   })();
 
   /* ---------- expense log ---------- */
-  var RATE_DEFAULT = 43, JCARD_CAP = 33333;
-  var REFUND_THRESHOLD = 75000, REFUND_RATE = 0.075, MIN_REFUNDABLE = 15000;
+  var RATE_DEFAULT = 43;
 
   var db = null, entries = [], rate = RATE_DEFAULT;
   var $ = function(id){ return document.getElementById(id); };
@@ -1919,10 +1947,6 @@ footer{width:var(--wrap);margin-inline:auto;padding-block:1.8rem 3rem;border-top
     if (e.cur === "TWD") return Number(e.amt) || 0;
     return krwOf(e) / rate;
   }
-  function methodOf(e){
-    if (e.method) return e.method;
-    return (e.pay === "現金") ? "付現" : "刷卡";
-  }
   function setBar(el, pct, warnAt){
     var p = Math.max(0, Math.min(100, pct));
     el.style.width = p + "%";
@@ -1935,34 +1959,29 @@ footer{width:var(--wrap);margin-inline:auto;padding-block:1.8rem 3rem;border-top
   }
 
   function render(){
-    var totalNT = 0, jcardNT = 0, refundKRW = 0, totalKRW = 0, cardNT = 0, cashNT = 0;
+    var totalNT = 0, totalKRW = 0, twNT = 0, krNT = 0;
     entries.forEach(function(e){
       var nt = ntOf(e), kw = krwOf(e);
       totalNT += nt; totalKRW += kw;
-      if (methodOf(e) === "付現") cashNT += nt; else cardNT += nt;
-      // 在台灣付的（用台幣輸入）不算海外消費，不進 J 卡額度、也不能退稅
+      // 在台灣付的（用台幣輸入）不算海外消費，也不能退稅
       var abroad = (e.cur !== "TWD");
-      if (e.card === "富邦 J 卡" && abroad) jcardNT += nt;
-      if (abroad && e.cat === "購物" && kw >= MIN_REFUNDABLE) refundKRW += kw * REFUND_RATE;
+      if (abroad) krNT += nt; else twNT += nt;
     });
     $("m-spent").textContent = fmtNT(totalNT);
+    $("m-spent-krw").textContent = fmtKRW(totalKRW);
     $("m-spent-foot").innerHTML = entries.length
-      ? ('刷卡 ' + fmtNT(cardNT) + '　·　現金 ' + fmtNT(cashNT) + '<br>共 ' + entries.length + ' 筆　·　' + fmtKRW(totalKRW))
+      ? ('共 ' + entries.length + ' 筆　·　在台灣付 ' + fmtNT(twNT) + '　·　在韓國付 ' + fmtNT(krNT))
       : "還沒有紀錄";
-    $("m-jcard").textContent = fmtNT(jcardNT);
-    setBar($("m-jcard-bar"), jcardNT / JCARD_CAP * 100, 85);
-    $("m-refund").textContent = fmtKRW(refundKRW);
-    setBar($("m-refund-bar"), refundKRW / REFUND_THRESHOLD * 100, 80);
 
     if (!entries.length){
-      logEl.innerHTML = '<div class="empty"><svg><use href="#i-book"/></svg>' +
-        '<span>還沒有記錄。到了首爾，每筆消費隨手記一下，上面三個儀表會即時更新。</span></div>';
+      logEl.innerHTML = '<div class="empty"><svg><use href="#i-book"/></svg><span>' +
+        (db ? "還沒有記錄。每筆消費隨手記一下，上面的數字會即時更新。"
+            : "這份離線快照被清空了。重新整理頁面就會回到 9/26 的 63 筆原始紀錄。")
+        + '</span></div>';
       renderCats();
       return;
     }
     var rows = entries.map(function(e){
-      var m = methodOf(e), cash = (m === "付現");
-      var who = cash ? "付現" : ("刷 " + (e.card || "卡"));
       var tw = (e.cur === "TWD");
       return '<div class="er' + (e.id === editId ? ' editing' : '') + '">' +
         '<div class="er-top"><span class="er-label">' + esc(e.label) + '</span>' +
@@ -1970,12 +1989,10 @@ footer{width:var(--wrap);margin-inline:auto;padding-block:1.8rem 3rem;border-top
         '<button class="edt" data-id="' + esc(e.id) + '">改</button>' +
         '<button class="del" data-id="' + esc(e.id) + '">刪除</button></div>' +
         '<div class="er-amt"><span class="er-nt">' + fmtNT(ntOf(e)) + '</span>' +
-        '<span class="er-krw">' + (tw ? "在台灣付的" : fmtKRW(krwOf(e))) + '</span>' +
-        '<span class="er-pay' + (cash ? ' cash' : '') + '">' + esc(who) + '</span></div>' +
+        '<span class="er-krw">' + (tw ? "在台灣付的" : fmtKRW(krwOf(e))) + '</span></div>' +
         '</div>';
     }).join("");
     logEl.innerHTML = '<div class="erhead"><span>共 ' + entries.length + ' 筆</span>' +
-      '<span class="ersplit">刷卡 ' + fmtNT(cardNT) + ' · 現金 ' + fmtNT(cashNT) + '</span>' +
       '<span class="ertot">' + fmtNT(totalNT) + '<i>' + fmtKRW(totalKRW) + '</i></span></div>' +
       '<div class="elist">' + rows + '</div>';
     renderCats();
@@ -2094,6 +2111,93 @@ footer{width:var(--wrap);margin-inline:auto;padding-block:1.8rem 3rem;border-top
 
   function sortEntries(){ entries.sort(function(a,b){ return (b.ts||0) - (a.ts||0); }); }
 
+  /* ---------- 離線版的資料：2026/9/26 的快照 ---------- */
+  // [標籤, 金額, 幣別, 分類, 時間]
+  var SEED = [
+    ["機票", 13638, "TWD", "交通", 1789822800000],
+    ["江華島一日遊", 5200, "TWD", "門票雜項", 1789824600000],
+    ["網卡 eSIM", 318, "TWD", "門票雜項", 1789826400000],
+    ["住宿（全程）", 10575, "TWD", "住宿", 1789828200000],
+    ["韓服 西花", 1072, "TWD", "門票雜項", 1789830000000],
+    ["機場→雲西 Uber", 235, "TWD", "交通", 1789831800000],
+    ["雲西→弘大（₩4,350×2）", 8700, "KRW", "交通", 1789833600000],
+    ["置物櫃（₩4,000×4）", 16000, "KRW", "門票雜項", 1789835400000],
+    ["氣候同行卡 卡費", 3200, "KRW", "交通", 1789837200000],
+    ["七日票（₩20,600×2）", 41200, "KRW", "交通", 1789839000000],
+    ["刀削麵", 11000, "KRW", "餐食", 1789840800000],
+    ["肉餅", 7000, "KRW", "餐食", 1789842600000],
+    ["藥果", 500, "KRW", "餐食", 1789844400000],
+    ["葡萄", 5000, "KRW", "餐食", 1789846200000],
+    ["耳環（退稅 ₩1,000）", 20000, "KRW", "購物", 1789848000000],
+    ["晚餐", 21000, "KRW", "餐食", 1789849800000],
+    ["醫美", 3758, "TWD", "醫美", 1789851600000],
+    ["早餐＋香菸", 9900, "KRW", "餐食", 1789853400000],
+    ["糖果", 3000, "KRW", "餐食", 1789855200000],
+    ["午餐", 16000, "KRW", "餐食", 1789857000000],
+    ["海苔", 16500, "KRW", "購物", 1789858800000],
+    ["蝦味先＋糖果", 6100, "KRW", "購物", 1789860600000],
+    ["晚餐", 46000, "KRW", "餐食", 1789862400000],
+    ["大創", 32000, "KRW", "購物", 1789864200000],
+    ["茶", 3000, "KRW", "餐食", 1789866000000],
+    ["Olive Young（已扣琦代購 ₩24,500）", 4000, "KRW", "購物", 1789867800000],
+    ["便利商店（已扣艾代購 ₩9,000）", 92400, "KRW", "購物", 1789869600000],
+    ["早餐", 10300, "KRW", "餐食", 1789871400000],
+    ["杏仁", 39900, "KRW", "購物", 1789873200000],
+    ["藥局（已扣琦代購 ₩46,000）", 74000, "KRW", "購物", 1789875000000],
+    ["鹽麵包", 12000, "KRW", "餐食", 1789876800000],
+    ["冰淇淋", 12000, "KRW", "餐食", 1789878600000],
+    ["Verish", 70800, "KRW", "購物", 1789880400000],
+    ["大福", 9500, "KRW", "餐食", 1789882200000],
+    ["香水", 119900, "KRW", "購物", 1789884000000],
+    ["馬鈴薯排骨湯", 34000, "KRW", "餐食", 1789885800000],
+    ["衣服", 75000, "KRW", "購物", 1789887600000],
+    ["如 早餐", 1500, "KRW", "餐食", 1789889400000],
+    ["無垢屋", 36000, "KRW", "餐食", 1789891200000],
+    ["Bagel", 5300, "KRW", "餐食", 1789893000000],
+    ["藍瓶咖啡", 15500, "KRW", "餐食", 1789894800000],
+    ["Artist Bakery", 11700, "KRW", "餐食", 1789896600000],
+    ["麻花捲", 1000, "KRW", "餐食", 1789898400000],
+    ["衣服", 26500, "KRW", "購物", 1789900200000],
+    ["綠豆煎餅", 6000, "KRW", "餐食", 1789902000000],
+    ["藥局（已扣王代購 ₩70,000）", 54000, "KRW", "購物", 1789903800000],
+    ["桃子", 10000, "KRW", "餐食", 1789905600000],
+    ["Zara", 133700, "KRW", "購物", 1789907400000],
+    ["背心", 119200, "KRW", "購物", 1789909200000],
+    ["包包", 100000, "KRW", "購物", 1789911000000],
+    ["樂天超市", 103580, "KRW", "購物", 1789912800000],
+    ["一隻雞", 11000, "KRW", "餐食", 1789914600000],
+    ["耳環髮飾", 25700, "KRW", "購物", 1789916400000],
+    ["Olive Young", 40900, "KRW", "購物", 1789918200000],
+    ["大創", 35000, "KRW", "購物", 1789920000000],
+    ["雞蛋糕", 3000, "KRW", "餐食", 1789921800000],
+    ["醬蟹", 57760, "KRW", "餐食", 1789923600000],
+    ["衣服", 179600, "KRW", "購物", 1789925400000],
+    ["衣服", 12000, "KRW", "購物", 1789927200000],
+    ["雞蛋糕", 2000, "KRW", "餐食", 1789929000000],
+    ["哥哥衣服", 79900, "KRW", "購物", 1789930800000],
+    ["午餐", 56000, "KRW", "餐食", 1789932600000],
+    ["CU（₩33,000＋₩21,750）", 54750, "KRW", "購物", 1789934400000]
+  ];
+  var LSK = "ara-exp-v1";
+  function saveLocal(){
+    if (db) return;                                   // 有雲端就不要碰本機
+    try { localStorage.setItem(LSK, JSON.stringify(entries)); } catch(e){}
+  }
+  function loadLocal(){
+    if (entries.length) return;      // 已經有資料（雲端載過）就不要蓋掉
+    var raw = null;
+    try { raw = localStorage.getItem(LSK); } catch(e){}
+    if (raw){ try { entries = JSON.parse(raw) || []; } catch(e){ entries = []; } }
+    if (!entries.length){
+      entries = SEED.map(function(x, i){
+        return { id: "s" + i, label: x[0], cat: x[3], amt: x[1], cur: x[2],
+                 krw: (x[2] === "TWD") ? Math.round(x[1] * RATE_DEFAULT) : x[1], ts: x[4] };
+      });
+    }
+    sortEntries();
+    try { var r = Number(localStorage.getItem(LSK + "-rate")); if (r > 0){ rate = r; rateInput.value = r; } } catch(e){}
+  }
+
   /* ---------- 改某一筆 ---------- */
   var editId = null;
   function findEntry(id){
@@ -2119,9 +2223,7 @@ footer{width:var(--wrap);margin-inline:auto;padding-block:1.8rem 3rem;border-top
     $("f-amt").placeholder = (cur === "TWD") ? "800" : "35000";
     $("f-amt").value = (e.amt != null && !isNaN(Number(e.amt)) && Number(e.amt) > 0) ? e.amt : (e.krw || "");
     $("f-cat").value = e.cat || "購物";
-    segSet("f-method", methodOf(e));
-    if (e.card) $("f-card").value = e.card;
-    syncCard(); ntHint();
+    ntHint();
     $("go-txt").textContent = "儲存修改";
     setGoIcon("#i-check");
     $("f-cancel").hidden = false;
@@ -2143,32 +2245,29 @@ footer{width:var(--wrap);margin-inline:auto;padding-block:1.8rem 3rem;border-top
   $("f-cancel").addEventListener("click", endEdit);
   function addLocal(rec){
     rec.id = "local-" + Date.now() + "-" + Math.random().toString(36).slice(2,7);
-    entries.push(rec); sortEntries(); render();
+    entries.push(rec); sortEntries(); saveLocal(); render();
   }
-  function removeLocal(id){ entries = entries.filter(function(e){ return e.id !== id; }); render(); }
+  function removeLocal(id){ entries = entries.filter(function(e){ return e.id !== id; }); saveLocal(); render(); }
 
   $("add-form").addEventListener("submit", function(ev){
     ev.preventDefault();
     var label = $("f-label").value.trim(), amt = Number($("f-amt").value);
     if (!label || !(amt > 0)) return;
-    var cur = segVal("f-cur"), method = segVal("f-method");
+    var cur = segVal("f-cur");
     var rec = { label: label, cat: $("f-cat").value,
                 amt: amt, cur: cur,
                 krw: (cur === "TWD") ? Math.round(amt * rate) : amt,
-                method: method,
-                card: (method === "刷卡") ? $("f-card").value : "",
-                pay: (method === "刷卡") ? $("f-card").value : "現金",
                 ts: Date.now() };
     if (editId){
       // 改的時候保留原本的時間，順序才不會跳掉
       var orig = findEntry(editId);
       rec.ts = (orig && orig.ts) || Date.now();
-      if (db && editId.indexOf("local-") !== 0){
+      if (db && editId.indexOf("local-") !== 0 && editId.charAt(0) !== "s"){
         db.collection("expenses").doc(editId).set(rec).catch(function(err){ console.warn(err); });
       } else {
         rec.id = editId;
         for (var i = 0; i < entries.length; i++){ if (entries[i].id === editId){ entries[i] = rec; break; } }
-        sortEntries();
+        sortEntries(); saveLocal();
       }
       endEdit();
       return;
@@ -2185,7 +2284,7 @@ footer{width:var(--wrap);margin-inline:auto;padding-block:1.8rem 3rem;border-top
     if (!btn) return;
     if (btn.getAttribute("data-id") === editId) endEdit();
     var id = btn.getAttribute("data-id");
-    if (db && id.indexOf("local-") !== 0){
+    if (db && id.indexOf("local-") !== 0 && id.charAt(0) !== "s"){
       db.collection("expenses").doc(id).delete().catch(function(e){ console.warn(e); });
     } else { removeLocal(id); }
   });
@@ -2210,30 +2309,44 @@ footer{width:var(--wrap);margin-inline:auto;padding-block:1.8rem 3rem;border-top
     if (!(v > 0)) { el.textContent = (cur === "TWD") ? "≈ ₩0" : "≈ NT$0"; return; }
     el.textContent = (cur === "TWD") ? ("≈ " + fmtKRW(v * rate)) : ("≈ " + fmtNT(toNT(v)));
   }
-  function syncCard(){
-    var cash = (segVal("f-method") === "付現");
-    document.querySelector(".f-card").style.visibility = cash ? "hidden" : "";
-  }
   $("f-amt").addEventListener("input", ntHint);
   segBind("f-cur", function(v){
     $("f-amt").step = (v === "TWD") ? "1" : "100";
     $("f-amt").placeholder = (v === "TWD") ? "800" : "35000";
     ntHint();
   });
-  segBind("f-method", syncCard);
-  syncCard();
 
-  rateInput.addEventListener("input", function(){
-    var v = Number(rateInput.value);
-    rate = v > 0 ? v : RATE_DEFAULT;
-    ntHint();
-    render();
+  function markPick(){
+    var box = $("rpick"); if (!box) return;
+    box.querySelectorAll("button").forEach(function(b){
+      b.setAttribute("aria-pressed", Math.abs(Number(b.getAttribute("data-r")) - rate) < 0.001 ? "true" : "false");
+    });
+  }
+  function applyRate(v, writeInput){
+    rate = (v > 0) ? Math.round(v * 100) / 100 : RATE_DEFAULT;
+    if (writeInput) rateInput.value = rate;
+    markPick(); ntHint(); render();
     if (db) db.doc("settings/main").set({ rate: rate }).catch(function(){});
+    else { try { localStorage.setItem(LSK + "-rate", String(rate)); } catch(e){} }
+  }
+  rateInput.addEventListener("input", function(){ applyRate(Number(rateInput.value), false); });
+  $("rpick").addEventListener("click", function(ev){
+    var b = ev.target.closest("button"); if (!b) return;
+    applyRate(Number(b.getAttribute("data-r")), true);
   });
+  document.querySelector(".rstepper").addEventListener("click", function(ev){
+    var b = ev.target.closest("button.rstep"); if (!b) return;
+    applyRate(rate + Number(b.getAttribute("data-d")), true);
+  });
+  markPick();
 
   render();
 
-  function offline(){ statusTxt.textContent = "本機暫存"; statusEl.setAttribute("data-s","off"); }
+  function offline(){
+    statusTxt.textContent = "離線快照"; statusEl.setAttribute("data-s","off");
+    var w = $("offline-warn"); if (w) w.hidden = false;
+    loadLocal(); markPick(); render();
+  }
 
   if (window.claude && typeof window.claude.use === "function"){
     window.claude.use("db").then(function(d){
@@ -2243,7 +2356,7 @@ footer{width:var(--wrap);margin-inline:auto;padding-block:1.8rem 3rem;border-top
       db.doc("settings/main").get().then(function(snap){
         if (snap.exists){
           var r = snap.data().rate;
-          if (typeof r === "number" && r > 0){ rate = r; rateInput.value = r; render(); }
+          if (typeof r === "number" && r > 0){ rate = r; rateInput.value = r; markPick(); render(); }
         }
       }).catch(function(){});
       db.collection("expenses").orderBy("ts","desc").limit(300).onSnapshot(
